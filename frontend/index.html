@@ -22,6 +22,14 @@
       <button class="btn btn-success">Open Original URL</button>
     </form>
 
+    <!-- Get URL Stats -->
+    <form id="statsForm" class="mb-4">
+      <input type="text" class="form-control mb-2" name="statShortCode" placeholder="Enter short code for stats" required />
+      <button class="btn btn-info">Get Stats</button>
+    </form>
+
+    <div id="statsResult" class="mb-4 text-muted"></div>
+
     <!-- URLs Table -->
     <table class="table table-bordered d-none" id="urlTable">
       <thead>
@@ -39,6 +47,7 @@
   <script>
     const table = document.getElementById("urlTable");
     const tbody = document.getElementById("urlList");
+    const statsResult = document.getElementById("statsResult");
 
     async function fetchAllUrls() {
       const res = await fetch("http://localhost:5000/short/all");
@@ -66,13 +75,11 @@
     document.getElementById("createForm").addEventListener("submit", async e => {
       e.preventDefault();
       const originalUrl = e.target.originalUrl.value;
-
       await fetch("http://localhost:5000/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ originalUrl }),
       });
-
       e.target.reset();
       fetchAllUrls();
     });
@@ -96,16 +103,33 @@
     document.getElementById("getUrlForm").addEventListener("submit", async e => {
       e.preventDefault();
       const shortCode = e.target.shortCode.value.trim();
-
       try {
         const res = await fetch(`http://localhost:5000/shorten/${shortCode}`);
         if (!res.ok) throw new Error("Not Found");
-
         const data = await res.json();
-        console.log( "data from getOriginalUrl: " ,data);
         window.open(data.urlDoc.url, "_blank");
       } catch (err) {
         alert("Original URL not found.");
+      }
+    });
+
+    document.getElementById("statsForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const shortCode = e.target.statShortCode.value.trim();
+      try {
+        const res = await fetch(`http://localhost:5000/shorten/stats/${shortCode}`);
+        if (!res.ok) throw new Error("Not Found");
+        const data = await res.json();
+        statsResult.innerHTML = `
+          <strong>Stats:</strong><br/>
+          Original URL: ${data.url}<br/>
+          Short Code: ${data.shortCode}<br/>
+          Created At: ${new Date(data.createdAt).toLocaleString()}<br/>
+          Updated At: ${new Date(data.updatedAt).toLocaleString()}<br/>
+          Click Count: ${data.clickCount}
+        `;
+      } catch (err) {
+        statsResult.innerText = "Stats not found.";
       }
     });
 

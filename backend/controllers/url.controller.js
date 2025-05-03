@@ -67,6 +67,9 @@ export const getOriginalUrl = async (req, res) => {
 };
 
 
+
+
+
 export const getAllUrl = async (req, res) => {
 	try {
 		const Urls = await Url.find();

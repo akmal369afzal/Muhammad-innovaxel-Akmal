@@ -70,6 +70,29 @@ export const getOriginalUrl = async (req, res) => {
 
 
 
+export const getUrlStats = async (req, res) => {
+	try {
+		const { shortCode } = req.params;
+		const urlDoc = await Url.findOne({ shortCode });
+		if (!urlDoc) return res.status(404).json({ message: "Not Found" });
+		res.status(200).json({
+			id: urlDoc._id,
+			url: urlDoc.url,
+			shortCode: urlDoc.shortCode,
+			createdAt: urlDoc.createdAt,
+			updatedAt: urlDoc.updatedAt,
+			accessCount: urlDoc.clickCount
+		});
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+};
+
+
+
+
+
+
 
 
 export const getAllUrl = async (req, res) => {

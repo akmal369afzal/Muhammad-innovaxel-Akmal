@@ -122,11 +122,12 @@
         const data = await res.json();
         statsResult.innerHTML = `
           <strong>Stats:</strong><br/>
+          ID: ${data.id}<br/>
           Original URL: ${data.url}<br/>
           Short Code: ${data.shortCode}<br/>
           Created At: ${new Date(data.createdAt).toLocaleString()}<br/>
           Updated At: ${new Date(data.updatedAt).toLocaleString()}<br/>
-          Click Count: ${data.clickCount}
+          Click Count: ${data.accessCount}
         `;
       } catch (err) {
         statsResult.innerText = "Stats not found.";

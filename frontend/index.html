@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Short URL Manager</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body class="p-4">
+  <div class="container">
+    <h2 class="mb-4">Short URL Manager</h2>
+
+    <!-- Create Short URL -->
+    <form id="createForm" class="mb-3">
+      <h5>Create Short URL</h5>
+      <input type="url" class="form-control mb-2" name="originalUrl" placeholder="Original URL" required />
+      <button class="btn btn-primary">Create</button>
+    </form>
+
+    <!-- Update/Delete Form -->
+    <div id="manageSection" class="mb-3 d-none">
+      <h5>Manage Created URL</h5>
+      <input type="hidden" id="shortId" />
+      <input type="url" class="form-control mb-2" id="manageOriginalUrl" required />
+
+      <button class="btn btn-warning me-2" id="updateBtn">Update</button>
+      <button class="btn btn-danger" id="deleteBtn">Delete</button>
+    </div>
+
+    <!-- Get Original URL -->
+    <form id="getForm" class="mb-3 mt-4">
+      <h5>Get Original URL from Short</h5>
+      <input type="text" class="form-control mb-2" name="shortUrlToGet" placeholder="Short URL" required />
+      <button class="btn btn-info">Open URL</button>
+    </form>
+  </div>
+
+  <script>
+    let currentId = "";
+
+    document.getElementById("createForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const originalUrl = e.target.originalUrl.value;
+
+      const res = await fetch("http://localhost:5000/api/shorten", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ originalUrl }),
+      });
+      const data = await res.json();
+
+      currentId = data.id;
+      document.getElementById("shortId").value = data.id;
+      document.getElementById("manageOriginalUrl").value = originalUrl;
+      document.getElementById("manageSection").classList.remove("d-none");
+    });
+
+    document.getElementById("updateBtn").addEventListener("click", async () => {
+      const id = document.getElementById("shortId").value;
+      const newUrl = document.getElementById("manageOriginalUrl").value;
+
+      await fetch("http://localhost:5000/api/update", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, newUrl }),
+      });
+    });
+
+    document.getElementById("deleteBtn").addEventListener("click", async () => {
+      const id = document.getElementById("shortId").value;
+
+      await fetch("http://localhost:5000/api/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      document.getElementById("manageSection").classList.add("d-none");
+    });
+
+    document.getElementById("getForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const shortUrl = e.target.shortUrlToGet.value;
+
+      const res = await fetch(`http://localhost:5000/api/url/${shortUrl}`);
+      const data = await res.json();
+
+      if (data.originalUrl) {
+        window.open(data.originalUrl, "_blank");
+      }
+    });
+  </script>
+</body>
+</html>

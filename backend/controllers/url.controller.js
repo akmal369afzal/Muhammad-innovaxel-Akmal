@@ -57,10 +57,12 @@ export const getOriginalUrl = async (req, res) => {
 	try {
 		const { shortCode } = req.params;
 		const urlDoc = await Url.findOne({ shortCode });
-		if (!urlDoc) {
-			return res.status(404).json({ message: "Short URL not found" });
-		}
-		res.status(200).json({ message: "Original URL found", urlDoc: urlDoc });
+		if (!urlDoc) return res.status(404).json({ message: "Short URL not found" });
+
+		urlDoc.clickCount++;
+		await urlDoc.save();
+
+		res.status(200).json({ message: "Original URL found", urlDoc });
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
 	}

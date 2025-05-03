@@ -53,6 +53,19 @@ export const deleteShortUrl = async (req, res) => {
 	}
 };
 
+export const getOriginalUrl = async (req, res) => {
+	try {
+		const { shortCode } = req.params;
+		const urlDoc = await Url.findOne({ shortCode });
+		if (!urlDoc) {
+			return res.status(404).json({ message: "Short URL not found" });
+		}
+		res.status(200).json({ message: "Original URL found", urlDoc: urlDoc });
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
+};
+
 
 export const getAllUrl = async (req, res) => {
 	try {

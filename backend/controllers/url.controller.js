@@ -1,7 +1,5 @@
 import Url from "../models/url.model.js";
 import { nanoid } from "nanoid";
-
-
 export const createShortUrl = async (req, res) => {
 	try {
 		const OriginalUrl = req.body.originalUrl;
@@ -68,8 +66,6 @@ export const getOriginalUrl = async (req, res) => {
 	}
 };
 
-
-
 export const getUrlStats = async (req, res) => {
 	try {
 		const { shortCode } = req.params;
@@ -87,13 +83,6 @@ export const getUrlStats = async (req, res) => {
 		res.status(500).json({ message: "Server error", error: error.message });
 	}
 };
-
-
-
-
-
-
-
 
 export const getAllUrl = async (req, res) => {
 	try {

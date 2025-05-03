@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/db.js";
 import urlRoutes from "./routes/url.route.js";
+import { getAllUrl } from "./controllers/url.controller.js";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/shorten", urlRoutes);
+app.get("/short/all", getAllUrl);
 
 app.listen(PORT, async () => {
     await connectDB();

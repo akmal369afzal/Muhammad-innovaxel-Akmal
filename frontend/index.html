@@ -16,6 +16,12 @@
       <button class="btn btn-primary">Create</button>
     </form>
 
+    <!-- Retrieve Original URL -->
+    <form id="getUrlForm" class="mb-4">
+      <input type="text" class="form-control mb-2" name="shortCode" placeholder="Enter short code" required />
+      <button class="btn btn-success">Open Original URL</button>
+    </form>
+
     <!-- URLs Table -->
     <table class="table table-bordered d-none" id="urlTable">
       <thead>
@@ -35,20 +41,23 @@
     const tbody = document.getElementById("urlList");
 
     async function fetchAllUrls() {
-      const res = await fetch("http://localhost:5000/shorten/all");
-      let data = await res.json();
-      data = data.Urls;
+      const res = await fetch("http://localhost:5000/short/all");
+      const result = await res.json();
+      const data = result.Urls || [];
       tbody.innerHTML = "";
+      if (data.length === 0) {
+        table.classList.add("d-none");
+        return;
+      }
+
       data.forEach(item => {
         const row = document.createElement("tr");
-
         row.innerHTML = `
           <td><input type="text" class="form-control" value="${item.url}" id="url-${item._id}" /></td>
           <td>${item.shortCode}</td>
           <td><button class="btn btn-warning btn-sm" onclick="updateUrl('${item._id}')">Update</button></td>
           <td><button class="btn btn-danger btn-sm" onclick="deleteUrl('${item._id}')">Delete</button></td>
         `;
-
         tbody.appendChild(row);
       });
       table.classList.remove("d-none");
@@ -83,6 +92,22 @@
       });
       fetchAllUrls();
     }
+
+    document.getElementById("getUrlForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const shortCode = e.target.shortCode.value.trim();
+
+      try {
+        const res = await fetch(`http://localhost:5000/shorten/${shortCode}`);
+        if (!res.ok) throw new Error("Not Found");
+
+        const data = await res.json();
+        console.log( "data from getOriginalUrl: " ,data);
+        window.open(data.urlDoc.url, "_blank");
+      } catch (err) {
+        alert("Original URL not found.");
+      }
+    });
 
     fetchAllUrls();
   </script>

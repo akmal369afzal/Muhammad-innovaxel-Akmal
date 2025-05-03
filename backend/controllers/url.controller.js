@@ -38,27 +38,26 @@ export const updateShortUrl = async (req, res) => {
 };
 
 export const deleteShortUrl = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const deletedUrl = await Url.findByIdAndDelete(id);
+	try {
+		const { id } = req.params;
 
-    if (!deletedUrl) {
-      return res.status(404).json({ message: "Short URL not found" });
-    }
+		const deletedUrl = await Url.findByIdAndDelete(id);
 
-    res.status(204).send(); 
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
+		if (!deletedUrl) {
+			return res.status(404).json({ message: "Short URL not found" });
+		}
+
+		res.status(204).send();
+	} catch (error) {
+		res.status(500).json({ message: "Server error", error: error.message });
+	}
 };
-
 
 
 export const getAllUrl = async (req, res) => {
 	try {
 		const Urls = await Url.find();
-		res.status(201).json({ message: "shortUrl created", Urls: Urls });
+		res.status(200).json({ message: "shortUrl created", Urls: Urls });
 	} catch (error) {
 		res.status(500).json({ message: "Server error", error: error.message });
 	}

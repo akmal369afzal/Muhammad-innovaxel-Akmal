@@ -69,20 +69,17 @@
     });
 
     async function updateUrl(id) {
-      const newUrl = document.getElementById(`url-${id}`).value;
-      await fetch("http://localhost:5000/shorten", {
+      await fetch(`http://localhost:5000/shorten/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, newUrl }),
       });
       fetchAllUrls();
     }
 
     async function deleteUrl(id) {
-      await fetch("http://localhost:5000/shorten", {
+      await fetch(`http://localhost:5000/shorten/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
       });
       fetchAllUrls();
     }

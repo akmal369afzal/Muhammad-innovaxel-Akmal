@@ -11,84 +11,83 @@
     <h2 class="mb-4">Short URL Manager</h2>
 
     <!-- Create Short URL -->
-    <form id="createForm" class="mb-3">
-      <h5>Create Short URL</h5>
+    <form id="createForm" class="mb-4">
       <input type="url" class="form-control mb-2" name="originalUrl" placeholder="Original URL" required />
       <button class="btn btn-primary">Create</button>
     </form>
 
-    <!-- Update/Delete Form -->
-    <div id="manageSection" class="mb-3 d-none">
-      <h5>Manage Created URL</h5>
-      <input type="hidden" id="shortId" />
-      <input type="url" class="form-control mb-2" id="manageOriginalUrl" required />
-
-      <button class="btn btn-warning me-2" id="updateBtn">Update</button>
-      <button class="btn btn-danger" id="deleteBtn">Delete</button>
-    </div>
-
-    <!-- Get Original URL -->
-    <form id="getForm" class="mb-3 mt-4">
-      <h5>Get Original URL from Short</h5>
-      <input type="text" class="form-control mb-2" name="shortUrlToGet" placeholder="Short URL" required />
-      <button class="btn btn-info">Open URL</button>
-    </form>
+    <!-- URLs Table -->
+    <table class="table table-bordered d-none" id="urlTable">
+      <thead>
+        <tr>
+          <th>Original URL</th>
+          <th>Short Code</th>
+          <th>Update</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="urlList"></tbody>
+    </table>
   </div>
 
   <script>
-    let currentId = "";
+    const table = document.getElementById("urlTable");
+    const tbody = document.getElementById("urlList");
+
+    async function fetchAllUrls() {
+      const res = await fetch("http://localhost:5000/shorten/all");
+      let data = await res.json();
+      data = data.Urls;
+      tbody.innerHTML = "";
+      data.forEach(item => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td><input type="text" class="form-control" value="${item.url}" id="url-${item._id}" /></td>
+          <td>${item.shortCode}</td>
+          <td><button class="btn btn-warning btn-sm" onclick="updateUrl('${item._id}')">Update</button></td>
+          <td><button class="btn btn-danger btn-sm" onclick="deleteUrl('${item._id}')">Delete</button></td>
+        `;
+
+        tbody.appendChild(row);
+      });
+      table.classList.remove("d-none");
+    }
 
     document.getElementById("createForm").addEventListener("submit", async e => {
       e.preventDefault();
       const originalUrl = e.target.originalUrl.value;
 
-      const res = await fetch("http://localhost:5000/api/shorten", {
+      await fetch("http://localhost:5000/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ originalUrl }),
       });
-      const data = await res.json();
 
-      currentId = data.id;
-      document.getElementById("shortId").value = data.id;
-      document.getElementById("manageOriginalUrl").value = originalUrl;
-      document.getElementById("manageSection").classList.remove("d-none");
+      e.target.reset();
+      fetchAllUrls();
     });
 
-    document.getElementById("updateBtn").addEventListener("click", async () => {
-      const id = document.getElementById("shortId").value;
-      const newUrl = document.getElementById("manageOriginalUrl").value;
-
-      await fetch("http://localhost:5000/api/update", {
+    async function updateUrl(id) {
+      const newUrl = document.getElementById(`url-${id}`).value;
+      await fetch("http://localhost:5000/shorten", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, newUrl }),
       });
-    });
+      fetchAllUrls();
+    }
 
-    document.getElementById("deleteBtn").addEventListener("click", async () => {
-      const id = document.getElementById("shortId").value;
-
-      await fetch("http://localhost:5000/api/delete", {
+    async function deleteUrl(id) {
+      await fetch("http://localhost:5000/shorten", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
+      fetchAllUrls();
+    }
 
-      document.getElementById("manageSection").classList.add("d-none");
-    });
-
-    document.getElementById("getForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const shortUrl = e.target.shortUrlToGet.value;
-
-      const res = await fetch(`http://localhost:5000/api/url/${shortUrl}`);
-      const data = await res.json();
-
-      if (data.originalUrl) {
-        window.open(data.originalUrl, "_blank");
-      }
-    });
+    fetchAllUrls();
   </script>
 </body>
 </html>

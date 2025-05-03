@@ -16,14 +16,10 @@ export const createShortUrl = async (req, res) => {
 	}
 };
 
-
-
-
-
 export const updateShortUrl = async (req, res) => {
 	try {
 		const { id } = req.params;
-		
+
 		if (!id) {
 			return res.status(400).json({ message: "ID required" });
 		}
@@ -41,8 +37,21 @@ export const updateShortUrl = async (req, res) => {
 	}
 };
 
+export const deleteShortUrl = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const deletedUrl = await Url.findByIdAndDelete(id);
 
+    if (!deletedUrl) {
+      return res.status(404).json({ message: "Short URL not found" });
+    }
 
+    res.status(204).send(); 
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 
 
